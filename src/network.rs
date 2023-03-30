@@ -320,6 +320,19 @@ pub fn connect(host: &str, port: u16, default: bool, secret: &str) {
     }
 }
 
+/// Serves as a VPN server by listening on a specified port, managing TUN devices, and
+/// handling client connections using the provided pre-shared secret and DNS settings.
+/// This function is only available on Linux.
+///
+/// # Arguments
+///
+/// * `port`: The UDP port to listen on.
+/// * `secret`: The pre-shared secret to use for encrypted communication with clients.
+/// * `dns`: The DNS server IP address to provide to connected clients.
+///
+/// # Panics
+///
+/// * When running on an operating system other than Linux.
 pub fn serve(port: u16, secret: &str, dns: IpAddr) {
     if cfg!(not(target_os = "linux")) {
         panic!("Server mode is only available in Linux!");
