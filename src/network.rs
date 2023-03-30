@@ -97,20 +97,36 @@ fn derive_keys(password: &str) -> aead::LessSafeKey {
     less_safe_key
 }
 
+// This function initiates a connection with a remote server over a UDP socket, 
+// sends an encrypted request, and receives an encrypted response, which is decrypted and returned.
+//
+// `socket`: A reference to the UDP socket used for communication.
+// `addr`: A reference to the remote server's SocketAddr.
+// `secret`: A reference to the pre-shared secret for encryption and decryption.
+//
+// Returns a Result containing a tuple with an Id, Token, and a String, or an error message.
 fn initiate(
     socket: &UdpSocket,
     addr: &SocketAddr,
     secret: &str,
 ) -> Result<(Id, Token, String), String> {
+    // Derive the encryption keys from the pre-shared secret.
     let key = derive_keys(secret);
+
+    // Create a request message.
     let req_msg = Message::Request;
+
+    // Serialize the request message and handle errors.
     let encoded_req_msg: Vec<u8> = serialize(&req_msg).map_err(|e| e.to_string())?;
+
+    // Encrypt the serialized request message using the derived key.
     let mut encrypted_req_msg = encoded_req_msg.clone();
     encrypted_req_msg.resize(encoded_req_msg.len() + key.algorithm().tag_len(), 0);
     let (aad, nonce) = generate_add_nonce(secret);
     key.seal_in_place_append_tag(nonce, aad, &mut encrypted_req_msg)
         .unwrap();
 
+    // Send the encrypted request message to the remote server.
     let mut remaining_len = encrypted_req_msg.len();
     while remaining_len > 0 {
         let sent_bytes = socket
