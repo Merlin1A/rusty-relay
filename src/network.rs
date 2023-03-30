@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Import required crates and modules
 use crate::device;
 use crate::utils;
 use bincode::{deserialize, serialize};
@@ -30,20 +31,24 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time;
 use transient_hashmap::TransientHashMap;
 
+// Define global variables
 pub static INTERRUPTED: AtomicBool = AtomicBool::new(false);
 static CONNECTED: AtomicBool = AtomicBool::new(false);
 static LISTENING: AtomicBool = AtomicBool::new(false);
 const KEY_LEN: usize = 32;
 
+// Define type aliases
 type Id = u8;
 type Token = u64;
 
+// Generate a nonce for encryption operations
 fn generate_add_nonce(secret: &str) -> (aead::Aad<[u8; 0]>, aead::Nonce) {
     let nonce = aead::Nonce::assume_unique_for_key([0; 12]);
     let aad = aead::Aad::empty();
     (aad, nonce)
 }
 
+// Define a message enum for communication between peers
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 enum Message {
     Request,
@@ -51,14 +56,17 @@ enum Message {
     Data { id: Id, token: Token, data: Vec<u8> },
 }
 
+// Define mio tokens for TUN and SOCK
 const TUN: mio::Token = mio::Token(0);
 const SOCK: mio::Token = mio::Token(1);
 
+// Resolve the IP address for a given host
 fn resolve(host: &str) -> Result<IpAddr, String> {
     let ip_list = dns_lookup::lookup_host(host).map_err(|_| "dns_lookup::lookup_host")?;
     Ok(ip_list.first().unwrap().clone())
 }
 
+// Attempt to create a TUN device
 fn create_tun_attempt() -> device::Tun {
     fn attempt(id: u8) -> device::Tun {
         match id {
@@ -72,6 +80,7 @@ fn create_tun_attempt() -> device::Tun {
     attempt(0)
 }
 
+// Derive keys for encryption and decryption
 fn derive_keys(password: &str) -> aead::LessSafeKey {
     let mut key = [0; KEY_LEN];
     let salt = vec![0; 64];
