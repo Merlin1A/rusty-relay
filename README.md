@@ -18,7 +18,7 @@ You can compile it from source if
 your machine is installed with [Rust](https://www.rust-lang.org/en-US/install.html).
 
 ```
-$ git clone https://github.com/changlan/rusty-relay.git
+$ git clone https://github.com/Merlin1A/rusty-relay.git
 $ cd rusty-relay
 $ cargo build --release
 ```
