@@ -1,9 +1,13 @@
+<div align="center">
+  
 ## Rusty Relay: High Performance Peer-to-Peer VPN
 
 > This program aims to be a secure, performant, & reliable peer to peer VPN, written in Rust. The goal is to to minimize the hassle of configuration and   > deployment, while also having multi-platform support, high security, high performance, and an easily auditable code base.
 
 To get a better understanding of the objective & timeline of the `rusty-relay` project, please check out [MOTIVATION.md](https://github.com/Merlin1A/rusty-relay/blob/master/MOTIVATION.md).
 
+<div align="left">
+  
 ### Modifications
 
 `rusty-relay` is based on the [Kytan](https://github.com/changlan/kytan) peer to peer VPN. As the development of `rusty-relay` progresses, it is likely that it will differ substantially from the original [Kytan](https://github.com/changlan/kytan) project. For the short term, a list of all major modifications that have been completed so far can be found below.
