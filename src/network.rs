@@ -66,8 +66,17 @@ fn resolve(host: &str) -> Result<IpAddr, String> {
     Ok(ip_list.first().unwrap().clone())
 }
 
-// Attempt to create a TUN device
+/// Attempts to create a TUN device by iterating through available device ids until successful.
+/// The function will panic if no available TUN device is found.
+///
+/// # Returns
+///
+/// * `device::Tun`: The successfully created TUN device.
 fn create_tun_attempt() -> device::Tun {
+
+    // A helper function that attempts to create a TUN device with the given id.
+    // If unsuccessful, it recursively tries with the next id.
+    // Panics if the maximum id (255) is reached and a TUN device cannot be created.
     fn attempt(id: u8) -> device::Tun {
         match id {
             255 => panic!("Unable to create TUN device."),
@@ -77,10 +86,21 @@ fn create_tun_attempt() -> device::Tun {
             },
         }
     }
+
+    // Start attempting to create a TUN device with id 0.
     attempt(0)
 }
 
-// Derive keys for encryption and decryption
+/// Derives an encryption key from a given password using the PBKDF2-HMAC-SHA256 key derivation function.
+/// The derived key is used for AES-256-GCM encryption and decryption.
+///
+/// # Arguments
+///
+/// * `password`: A reference to the password used for key derivation.
+///
+/// # Returns
+///
+/// * `aead::LessSafeKey`: The derived encryption key wrapped in a `LessSafeKey` type.
 fn derive_keys(password: &str) -> aead::LessSafeKey {
     let mut key = [0; KEY_LEN];
     let salt = vec![0; 64];
@@ -97,14 +117,20 @@ fn derive_keys(password: &str) -> aead::LessSafeKey {
     less_safe_key
 }
 
-// This function initiates a connection with a remote server over a UDP socket, 
-// sends an encrypted request, and receives an encrypted response, which is decrypted and returned.
-//
-// `socket`: A reference to the UDP socket used for communication.
-// `addr`: A reference to the remote server's SocketAddr.
-// `secret`: A reference to the pre-shared secret for encryption and decryption.
-//
-// Returns a Result containing a tuple with an Id, Token, and a String, or an error message.
+/// Initiates a connection with a remote server over a UDP socket, sends an encrypted request,
+/// and receives an encrypted response. The response is decrypted and returned as a tuple containing
+/// an Id, Token, and a String.
+///
+/// # Arguments
+///
+/// * `socket`: A reference to the UDP socket used for communication.
+/// * `addr`: A reference to the remote server's SocketAddr.
+/// * `secret`: A reference to the pre-shared secret for encryption and decryption.
+///
+/// # Returns
+///
+/// * `Result<(Id, Token, String), String>`: A Result containing a tuple with an Id, Token, and a String,
+///   or an error message in case of failure.
 fn initiate(
     socket: &UdpSocket,
     addr: &SocketAddr,
@@ -152,6 +178,16 @@ fn initiate(
     }
 }
 
+/// Establishes a connection to a remote server using a UDP socket and a TUN device.
+/// The function sets up the TUN device, configures DNS, and continuously processes data 
+/// between the TUN device and the UDP socket, handling encryption and compression as necessary.
+///
+/// # Arguments
+///
+/// * `host`: A reference to the remote server's hostname or IP address.
+/// * `port`: The remote server's port number.
+/// * `default`: A boolean that determines whether to set the server as the default gateway.
+/// * `secret`: A reference to the pre-shared secret for encryption and decryption.
 pub fn connect(host: &str, port: u16, default: bool, secret: &str) {
     info!("Working in client mode.");
     let remote_ip = resolve(host).unwrap();
