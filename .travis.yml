@@ -7,7 +7,7 @@ os:
 
 env:
   global:
-    - CRATE_NAME=kytan
+    - CRATE_NAME=rusty-relay
     - DEPLOY_VERSION=stable
   matrix:
     - TARGET=x86_64-apple-darwin
