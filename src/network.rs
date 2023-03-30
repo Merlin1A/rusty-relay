@@ -31,17 +31,27 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time;
 use transient_hashmap::TransientHashMap;
 
-// Define global variables
+// Global variables for interrupting, connection, and listening status.
 pub static INTERRUPTED: AtomicBool = AtomicBool::new(false);
 static CONNECTED: AtomicBool = AtomicBool::new(false);
 static LISTENING: AtomicBool = AtomicBool::new(false);
+
+// Constant for key length
 const KEY_LEN: usize = 32;
 
-// Define type aliases
+// Type aliases for Id and Token
 type Id = u8;
 type Token = u64;
 
-// Generate a nonce for encryption operations
+/// Generates a nonce and associated data for encryption operations.
+///
+/// # Arguments
+///
+/// * `secret` - A reference to the pre-shared secret.
+///
+/// # Returns
+///
+/// A tuple containing the associated data and the nonce.
 fn generate_add_nonce(secret: &str) -> (aead::Aad<[u8; 0]>, aead::Nonce) {
     let nonce = aead::Nonce::assume_unique_for_key([0; 12]);
     let aad = aead::Aad::empty();
