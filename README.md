@@ -7,6 +7,7 @@
 To get a better understanding of the objective & timeline of the `rusty-relay` project, please check out [MOTIVATION.md](https://github.com/Merlin1A/rusty-relay/blob/master/MOTIVATION.md).
 
 <div align="left">
+<br>
   
 ### Modifications
 
