@@ -3,7 +3,7 @@
 
 ## Rusty Relay: High Performance Peer-to-Peer VPN
 
-`Rusty Relay` is a high performance peer to peer VPN written in Rust. The goal is to
+`rusty-relay` is a high performance peer to peer VPN written in Rust. The goal is to
 to minimize the hassle of configuration and deployment with a goal of
 multi-platform support.
 
