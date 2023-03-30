@@ -2,7 +2,7 @@
 name = "rusty-relay"
 version = "0.0.1"
 authors = ["Jesse Brookins <jessebrookins@protonmail.com>"]
-edition = "2023"
+edition = "2021"
 
 [dependencies]
 libc = "*"
