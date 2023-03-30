@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/changlan/kytan.svg?branch=master)](https://travis-ci.org/changlan/kytan)
-[![codecov](https://codecov.io/gh/changlan/kytan/branch/master/graph/badge.svg)](https://codecov.io/gh/changlan/kytan)
-
 ## Rusty Relay: High Performance Peer-to-Peer VPN
 
 `rusty-relay` is a high performance peer to peer VPN written in Rust. The goal is to
