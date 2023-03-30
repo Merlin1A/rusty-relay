@@ -1,8 +1,8 @@
 [package]
-name = "kytan"
-version = "0.1.1"
-authors = ["Chang Lan <me@changlan.org>"]
-edition = "2018"
+name = "rusty-relay"
+version = "0.0.1"
+authors = ["Jesse Brookins <jessebrookins@protonmail.com>"]
+edition = "2023"
 
 [dependencies]
 libc = "*"
