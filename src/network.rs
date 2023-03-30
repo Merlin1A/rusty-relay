@@ -70,7 +70,15 @@ enum Message {
 const TUN: mio::Token = mio::Token(0);
 const SOCK: mio::Token = mio::Token(1);
 
-// Resolve the IP address for a given host
+/// Resolves a given hostname to its corresponding IP address.
+///
+/// # Arguments
+///
+/// * `host` - A reference to the hostname to be resolved.
+///
+/// # Returns
+///
+/// A `Result` containing an `IpAddr` on success, or a `String` error message on failure.
 fn resolve(host: &str) -> Result<IpAddr, String> {
     let ip_list = dns_lookup::lookup_host(host).map_err(|_| "dns_lookup::lookup_host")?;
     Ok(ip_list.first().unwrap().clone())
