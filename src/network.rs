@@ -504,6 +504,7 @@ mod tests {
     #[cfg(target_os = "linux")]
     use std::thread;
 
+    /// Tests the `resolve` function by checking if it can correctly resolve the loopback IP address.
     #[test]
     fn resolve_test() {
         assert_eq!(
@@ -512,6 +513,13 @@ mod tests {
         );
     }
 
+    /// Integration test for the server and client implementation. It spawns a server
+    /// and a client in separate threads, checks if the server is listening, and if the client
+    /// can connect. The test is only run on Linux.
+    ///
+    /// # Panics
+    ///
+    /// * If the current user is not root.
     #[test]
     #[cfg(target_os = "linux")]
     fn integration_test() {
