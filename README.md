@@ -2,13 +2,7 @@
 
 *__Disclamer__* _Rusty Relay is currently in active development, and there likely will be breaking changes. There are no guarantees, either implied or explicit, made by this software or me at this stage._
 
-&NewLine;
-&NewLine;
-
 > This program aims to be a secure, performant, & reliable peer to peer VPN, written in Rust. The goal is to to minimize the hassle of configuration and   > deployment, while also having multi-platform support, high security, high performance, and an easily auditable code base.
-
-&NewLine;
-&NewLine;
 
 To get a better understanding of the objective & timeline of the 'rusty-relay' project, please check out [MOTIVATION.md](https://github.com/Merlin1A/rusty-relay/blob/master/MOTIVATION.md).
 
