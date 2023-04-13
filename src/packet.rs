@@ -59,6 +59,24 @@ pub struct IcmpHeader {
     pub icmp_seq_num: u16,
 }
 
+/// Computes the raw checksum of a buffer.
+///
+/// This function is useful when calculating checksums for network protocols.
+/// It is a generic function that can be applied to any type `T`. The buffer must be
+/// properly aligned to `T`, otherwise the result is undefined.
+///
+/// # Arguments
+///
+/// * `buf` - A pointer to the start of the buffer.
+/// * `len` - The length of the buffer in bytes.
+///
+/// # Returns
+///
+/// * A 16-bit unsigned integer representing the raw checksum.
+///
+/// # Safety
+///
+/// This function is unsafe because it operates on raw pointers.
 fn raw_cksum<T>(buf: *const T, len: usize) -> u16 {
     let mut sum = Wrapping(0);
     let mut remaining_len = len;
@@ -78,6 +96,19 @@ fn raw_cksum<T>(buf: *const T, len: usize) -> u16 {
     sum.0
 }
 
+/// Calculates the IPv4 header checksum.
+///
+/// This function computes the checksum for an IPv4 header.
+/// The checksum algorithm used is the one's complement of the one's complement sum of all
+/// 16-bit words in the header.
+///
+/// # Arguments
+///
+/// * `buf` - A reference to an `Ipv4Header` instance.
+///
+/// # Returns
+///
+/// * A 16-bit unsigned integer representing the IPv4 header checksum.
 pub fn ipv4_cksum(buf: &Ipv4Header) -> u16 {
     let cksum = raw_cksum(buf as *const Ipv4Header, mem::size_of::<Ipv4Header>());
     if cksum == 0xffff {
