@@ -16,10 +16,28 @@ use libc;
 use log::info;
 use std::process::Command;
 
+/// Checks if the current process is running with root privileges.
+///
+/// # Returns
+///
+/// * `bool` - Returns `true` if the current process is running as root, otherwise `false`.
 pub fn is_root() -> bool {
     unsafe { libc::geteuid() == 0 }
 }
 
+/// Enables IPv4 forwarding on the system.
+///
+/// This function enables IP forwarding for IPv4 packets by modifying the appropriate
+/// kernel parameter via the `sysctl` command. It is designed to work with Linux and macOS.
+///
+/// # Returns
+///
+/// * `Result<(), String>` - Returns `Ok(())` if IPv4 forwarding is successfully enabled.
+///   If an error occurs, returns `Err(String)` containing the error message.
+///
+/// # Panics
+///
+/// This function will panic if the target OS is neither Linux nor macOS.
 pub fn enable_ipv4_forwarding() -> Result<(), String> {
     let sysctl_arg = if cfg!(target_os = "linux") {
         "net.ipv4.ip_forward=1"
@@ -53,6 +71,21 @@ pub struct DefaultGateway {
 }
 
 impl DefaultGateway {
+    /// Creates a new `DefaultGateway` instance and modifies the system routing table.
+    ///
+    /// This function creates a new `DefaultGateway` instance, saves the original default gateway,
+    /// adds a route to the remote host through the original default gateway, and optionally
+    /// replaces the default gateway with the provided `gateway`.
+    ///
+    /// # Arguments
+    ///
+    /// * `gateway` - A string slice representing the new default gateway's IP address.
+    /// * `remote` - A string slice representing the remote host's IP address.
+    /// * `default` - A boolean indicating whether to replace the current default gateway.
+    ///
+    /// # Returns
+    ///
+    /// * `DefaultGateway` - A new instance of the `DefaultGateway` struct.
     pub fn create(gateway: &str, remote: &str, default: bool) -> DefaultGateway {
         let origin = get_default_gateway().unwrap();
         info!("Original default gateway: {}.", origin);
@@ -70,6 +103,12 @@ impl DefaultGateway {
 }
 
 impl Drop for DefaultGateway {
+    /// Restores the original default gateway and removes the added route when the `DefaultGateway`
+    /// instance is dropped.
+    ///
+    /// This function is called automatically when the `DefaultGateway` instance goes out of scope.
+    /// It restores the original default gateway if it was replaced, and removes the added route
+    /// to the remote host.
     fn drop(&mut self) {
         if self.default {
             delete_default_gateway().unwrap();
@@ -79,6 +118,25 @@ impl Drop for DefaultGateway {
     }
 }
 
+/// Deletes a route from the system routing table.
+///
+/// This function deletes a route of the specified type from the system routing table using the
+/// `route` command. It is designed to work with Linux and macOS.
+///
+/// # Arguments
+///
+/// * `route_type` - An enum value of `RouteType`, specifying whether the route is a network
+///   or a host route.
+/// * `route` - A string slice representing the route's IP address or network.
+///
+/// # Returns
+///
+/// * `Result<(), String>` - Returns `Ok(())` if the route is successfully deleted. If an error
+///   occurs, returns `Err(String)` containing the error message.
+///
+/// # Panics
+///
+/// This function will panic if the target OS is neither Linux nor macOS.
 pub fn delete_route(route_type: RouteType, route: &str) -> Result<(), String> {
     let mode = match route_type {
         RouteType::Net => "-net",
@@ -111,6 +169,26 @@ pub fn delete_route(route_type: RouteType, route: &str) -> Result<(), String> {
     }
 }
 
+/// Adds a route to the system routing table.
+///
+/// This function adds a route of the specified type to the system routing table using the
+/// `route` command. It is designed to work with Linux and macOS.
+///
+/// # Arguments
+///
+/// * `route_type` - An enum value of `RouteType`, specifying whether the route is a network
+///   or a host route.
+/// * `route` - A string slice representing the route's IP address or network.
+/// * `gateway` - A string slice representing the gateway's IP address.
+///
+/// # Returns
+///
+/// * `Result<(), String>` - Returns `Ok(())` if the route is successfully added. If an error
+///   occurs, returns `Err(String)` containing the error message.
+///
+/// # Panics
+///
+/// This function will panic if the target OS is neither Linux nor macOS.
 pub fn add_route(route_type: RouteType, route: &str, gateway: &str) -> Result<(), String> {
     let mode = match route_type {
         RouteType::Net => "-net",
@@ -146,14 +224,43 @@ pub fn add_route(route_type: RouteType, route: &str, gateway: &str) -> Result<()
     }
 }
 
+
+/// Sets the system's default gateway.
+///
+/// # Arguments
+///
+/// * `gateway` - A string slice representing the IP address of the new default gateway.
+///
+/// # Returns
+///
+/// * `Result<(), String>` - Returns `Ok(())` if the default gateway is successfully set. If an error
+///   occurs, returns `Err(String)` containing the error message.
 pub fn set_default_gateway(gateway: &str) -> Result<(), String> {
     add_route(RouteType::Net, "default", gateway)
 }
 
+/// Deletes the system's default gateway.
+///
+/// # Returns
+///
+/// * `Result<(), String>` - Returns `Ok(())` if the default gateway is successfully deleted. If an error
+///   occurs, returns `Err(String)` containing the error message.
 pub fn delete_default_gateway() -> Result<(), String> {
     delete_route(RouteType::Net, "default")
 }
 
+/// Retrieves the system's current default gateway.
+///
+/// This function is designed to work with Linux and macOS.
+///
+/// # Returns
+///
+/// * `Result<String, String>` - Returns `Ok(String)` containing the IP address of the current default
+///   gateway if successful. If an error occurs, returns `Err(String)` containing the error message.
+///
+/// # Panics
+///
+/// This function will panic if the target OS is neither Linux nor macOS.
 pub fn get_default_gateway() -> Result<String, String> {
     let cmd = if cfg!(target_os = "linux") {
         "ip -4 route list 0/0 | awk '{print $3}'"
@@ -173,6 +280,12 @@ pub fn get_default_gateway() -> Result<String, String> {
     }
 }
 
+/// Retrieves the public IP address of the system.
+///
+/// # Returns
+///
+/// * `Result<String, String>` - Returns `Ok(String)` containing the public IP address if successful.
+///   If an error occurs, returns `Err(String)` containing the error message.
 pub fn get_public_ip() -> Result<String, String> {
     let output = Command::new("curl")
         .arg("ipecho.net/plain")
@@ -185,6 +298,16 @@ pub fn get_public_ip() -> Result<String, String> {
     }
 }
 
+/// Retrieves the gateway for a specific route.
+///
+/// # Arguments
+///
+/// * `route` - A string slice representing the route's IP address or network.
+///
+/// # Returns
+///
+/// * `Result<String, String>` - Returns `Ok(String)` containing the gateway IP address if successful.
+///   If an error occurs, returns `Err(String)` containing the error message.
 fn get_route_gateway(route: &str) -> Result<String, String> {
     let cmd = format!("ip -4 route list {}", route);
     let output = Command::new("bash").arg("-c").arg(cmd).output().unwrap();
@@ -198,6 +321,20 @@ fn get_route_gateway(route: &str) -> Result<String, String> {
     }
 }
 
+/// Sets the system's DNS resolver.
+///
+/// # Arguments
+///
+/// * `dns` - A string slice representing the IP address of the DNS server to use.
+///
+/// # Returns
+///
+/// * `Result<String, String>` - Returns `Ok(String)` if the DNS resolver is successfully set.
+///   If an error occurs, returns `Err(String)` containing the error message.
+///
+/// # Safety
+///
+/// This function overwrites the `/etc/resolv.conf` file and requires root privileges.
 pub fn set_dns(dns: &str) -> Result<String, String> {
     let cmd = format!("echo nameserver {} > /etc/resolv.conf", dns);
     let output = Command::new("bash").arg("-c").arg(cmd).output().unwrap();
