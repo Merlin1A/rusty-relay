@@ -345,6 +345,33 @@ pub fn set_dns(dns: &str) -> Result<String, String> {
     }
 }
 
+/// Flushes the system's DNS cache.
+///
+/// # Returns
+///
+/// * `Result<String, String>` - Returns `Ok(String)` if the DNS cache is successfully flushed.
+///   If an error occurs, returns `Err(String)` containing the error message.
+///
+/// # Safety
+///
+/// This function uses the `sudo` command to grant the necessary privileges to flush the DNS cache.
+/// Ensure that the user running this function has the appropriate permissions
+/// configured in the `/etc/sudoers` file.
+pub fn flush_dns() -> Result<String, String> {
+    let cmd = "sudo systemd-resolve --flush-caches";
+    let output = Command::new("bash")
+        .arg("-c")
+        .arg(cmd)
+        .output()
+        .unwrap();
+
+    if output.status.success() {
+        Ok(String::from_utf8(output.stdout).unwrap())
+    } else {
+        Err(String::from_utf8(output.stderr).unwrap())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::*;
