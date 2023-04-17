@@ -14,6 +14,8 @@ To get a better understanding of the objective & timeline of the `rusty-relay` p
 
 `rusty-relay` is based on the [Kytan](https://github.com/changlan/kytan) peer to peer VPN. As the development of `rusty-relay` progresses, it is likely that it will differ substantially from the original [Kytan](https://github.com/changlan/kytan) project. For the short term, a list of all major modifications that have been completed so far can be found below.
 
+- Added functionality to automatically flush the DNS 
+
 ### Supported Platforms
 
 - Linux
