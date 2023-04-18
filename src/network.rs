@@ -118,11 +118,12 @@ fn create_tun_attempt() -> device::Tun {
 ///
 /// # Returns
 ///
-/// * `aead::LessSafeKey`: The derived encryption key wrapped in a `LessSafeKey` type.
-fn derive_keys(password: &str) -> aead::LessSafeKey {
+/// * `(aead::LessSafeKey, Vec<u8>)`: A tuple containing the derived encryption key wrapped in a `LessSafeKey` type and the salt used for key derivation.
+fn derive_keys(password: &str) -> (aead::LessSafeKey, Vec<u8>) {
     let mut key = [0; KEY_LEN];
-    let salt = vec![0; 64];
-    let pbkdf2_iterations: NonZeroU32 = NonZeroU32::new(1024).unwrap();
+    let mut rng = rand::thread_rng();
+    let salt: Vec<u8> = (0..64).map(|_| rng.gen()).collect();
+    let pbkdf2_iterations: NonZeroU32 = NonZeroU32::new(50_000).unwrap();
     pbkdf2::derive(
         pbkdf2::PBKDF2_HMAC_SHA256,
         pbkdf2_iterations,
@@ -132,7 +133,7 @@ fn derive_keys(password: &str) -> aead::LessSafeKey {
     );
     let less_safe_key =
         aead::LessSafeKey::new(aead::UnboundKey::new(&aead::AES_256_GCM, &key).unwrap());
-    less_safe_key
+    (less_safe_key, salt)
 }
 
 /// Initiates a connection with a remote server over a UDP socket, sends an encrypted request,
